@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts for Cairo v0.20.0
-// (governance/governor/extensions/governor_core_execution.cairo)
+// OpenZeppelin Contracts for Cairo v1.0.0
+// (governance/src/governor/extensions/governor_core_execution.cairo)
 
 /// # GovernorTimelockExecution Component
 ///
@@ -39,6 +39,9 @@ pub mod GovernorTimelockExecutionComponent {
     type ProposalId = felt252;
     type TimelockProposalId = felt252;
 
+    /// This is P - 1 = 2**251 + 17 * 2 ** 192
+    const MAX_FELT: felt252 = 0 - 1;
+
     #[storage]
     pub struct Storage {
         pub Governor_timelock_controller: ContractAddress,
@@ -46,13 +49,13 @@ pub mod GovernorTimelockExecutionComponent {
     }
 
     #[event]
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, Debug, PartialEq, starknet::Event)]
     pub enum Event {
         TimelockUpdated: TimelockUpdated,
     }
 
     /// Emitted when the timelock controller used for proposal execution is modified.
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, Debug, PartialEq, starknet::Event)]
     pub struct TimelockUpdated {
         pub old_timelock: ContractAddress,
         pub new_timelock: ContractAddress,
@@ -66,7 +69,7 @@ pub mod GovernorTimelockExecutionComponent {
     // Extensions
     //
 
-    /// NOTE: Some of these function can reenter through the external calls to the timelock, but we
+    /// NOTE: Some of these functions can reenter through the external calls to the timelock, but we
     /// assume the timelock is trusted and well behaved (according to TimelockController) and this
     /// will not happen.
     pub impl GovernorExecution<
@@ -277,7 +280,8 @@ pub mod GovernorTimelockExecutionComponent {
         }
 
         /// Computes the `TimelockController` operation salt as the XOR of
-        /// the governor address and `description_hash`.
+        /// the governor address and `description_hash`. In the case of overflow, it is
+        /// reduced modulo P.
         ///
         /// It is computed with the governor address itself to avoid collisions across
         /// governor instances using the same timelock.
@@ -286,9 +290,16 @@ pub mod GovernorTimelockExecutionComponent {
         ) -> felt252 {
             let description_hash: u256 = description_hash.into();
             let this: felt252 = starknet::get_contract_address().into();
+            let max_felt: u256 = MAX_FELT.into();
 
-            // Unwrap is safe since the u256 value came from a felt252.
-            (this.into() ^ description_hash).try_into().unwrap()
+            let mut value = this.into() ^ description_hash;
+            if value > max_felt {
+                // Get the value modulo P.
+                // Invariant: 2 * max_felt > 2 ** 252 - 1 >= value
+                value = value - max_felt - 1;
+            }
+            // Unwrap is safe since value is less or equal than MAX_FELT.
+            value.try_into().unwrap()
         }
 
         /// Returns the timelock contract address wrapped in a ITimelockDispatcher.

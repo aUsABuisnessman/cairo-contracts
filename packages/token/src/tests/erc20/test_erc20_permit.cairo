@@ -1,9 +1,9 @@
 use core::hash::{HashStateExTrait, HashStateTrait};
 use core::poseidon::PoseidonTrait;
-use crate::erc20::ERC20Component;
 use crate::erc20::ERC20Component::{ERC20MixinImpl, InternalImpl};
 use crate::erc20::ERC20Component::{ERC20PermitImpl, SNIP12MetadataExternalImpl};
 use crate::erc20::snip12_utils::permit::{PERMIT_TYPE_HASH, Permit};
+use crate::erc20::{DefaultConfig, ERC20Component};
 use openzeppelin_test_common::mocks::erc20::DualCaseERC20PermitMock;
 use openzeppelin_test_common::mocks::erc20::DualCaseERC20PermitMock::SNIP12MetadataImpl;
 use openzeppelin_testing as utils;
@@ -239,7 +239,7 @@ fn test_domain_separator() {
 #[test]
 fn test_permit_type_hash() {
     let expected_type_hash = selector!(
-        "\"Permit\"(\"token\":\"ContractAddress\",\"spender\":\"ContractAddress\",\"amount\":\"u256\",\"nonce\":\"felt\",\"deadline\":\"u128\")",
+        "\"Permit\"(\"token\":\"ContractAddress\",\"spender\":\"ContractAddress\",\"amount\":\"u256\",\"nonce\":\"felt\",\"deadline\":\"u128\")\"u256\"(\"low\":\"u128\",\"high\":\"u128\")",
     );
     assert_eq!(PERMIT_TYPE_HASH, expected_type_hash);
 }
