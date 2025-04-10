@@ -9,15 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 2.0.0-alpha.0 (2025-03-20)
+
 ### Added
 
+- Support for granting a role with delay in AccessControl component (#1317)
+- The openzeppelin_macros package with the `with_components` macro (#1282)
 - ERC4626Component (#1170)
 - `Math::u256_mul_div` (#1170)
+
+### Changed
+
+- Bump scarb to v2.11.1 (#1373)
+- Bump scarb to v2.10.1 (#1358)
 
 ### Changed (Breaking)
 
 - Add SRC-107 to ERC20Component (#1294)
   - `decimals` are now configurable using the ImmutableConfig trait
+- Update UDC interface and preset for backward compatibility with v1 (#1371)
+  - Change `from_zero` argument to `not_from_zero` in both the interface and the
+    ContractDeployed event
+  - Add `deployContract` function to the preset
+  - Update salt hashing algorithm from Poseidon to Pedersen
+- Update ISRC6 interface to match latest changes reflected in the SNIP (#1383)
+  - `__execute__` entry point now doesn't return any value
+  - Account and EthAccount components SRC6 implementation updated accordingly
 
 ## 1.0.0 (2025-02-21)
 

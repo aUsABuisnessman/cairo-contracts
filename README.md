@@ -35,14 +35,14 @@ Edit `scarb.toml` and add:
 
 ```toml
 [dependencies]
-openzeppelin = "1.0.0"
+openzeppelin = "2.0.0-alpha.0"
 ```
 
 The previous example would import the entire library. We can also add each package as a separate dependency to improve the building time by not including modules that won't be used:
 
 ```toml
 [dependencies]
-openzeppelin_token = "1.0.0"
+openzeppelin_token = "2.0.0-alpha.0"
 ```
 
 Build the project to download it:
@@ -154,6 +154,10 @@ for the Starknet ecosystem. We address security through risk management in vario
 practices, scoping and API design, multi-layered review processes, and incident response preparedness.
 
 Refer to [SECURITY.md](SECURITY.md) for more details.
+
+Past audits can be found in [`audits/`](./audits).
+
+Smart contracts are an evolving technology and carry a high level of technical risk and uncertainty. Although OpenZeppelin is well known for its security audits, using OpenZeppelin Contracts for Cairo is not a substitute for a security audit.
 
 ## License
 
