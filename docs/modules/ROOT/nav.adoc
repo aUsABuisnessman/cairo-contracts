@@ -5,11 +5,13 @@
 
 ** xref:components.adoc[Components]
 ** xref:presets.adoc[Presets]
-** xref:interfaces.adoc[Interfaces and Dispatchers]
+** xref:guides/interfaces-and-dispatchers.adoc[Interfaces and Dispatchers]
 ** xref:guides/deployment.adoc[Counterfactual Deployments]
 ** xref:guides/snip12.adoc[SNIP12 and Typed Messages]
 
 * Modules
+
+** xref:interfaces.adoc[Interfaces]
 
 ** xref:access.adoc[Access]
 *** xref:/api/access.adoc[API Reference]
@@ -31,7 +33,9 @@
 *** xref:/guides/src5-migration.adoc[Migrating ERC165 to SRC5]
 *** xref:/api/introspection.adoc[API Reference]
 
-** xref:/api/macros.adoc[Macros]
+** xref:macros.adoc[Macros]
+*** xref:/macros/with_components.adoc[with_components]
+*** xref:/macros/type_hash.adoc[type_hash]
 
 ** xref:/api/merkle-tree.adoc[Merkle Tree]
 
@@ -52,6 +56,7 @@
 *** xref:/api/token_common.adoc[Common]
 
 ** xref:udc.adoc[Universal Deployer Contract]
+*** xref:/guides/deploy-udc.adoc[UDC Appchain Deployment]
 *** xref:/api/udc.adoc[API Reference]
 
 ** xref:upgrades.adoc[Upgrades]
