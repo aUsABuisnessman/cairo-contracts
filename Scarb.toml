@@ -25,7 +25,7 @@ keywords.workspace = true
 edition.workspace = true
 
 [workspace.package]
-version = "3.0.0-alpha.1"
+version = "3.0.0-alpha.2"
 edition = "2024_07"
 cairo-version = "2.12.0"
 scarb-version = "2.12.0"
@@ -45,7 +45,7 @@ keywords = [
 [workspace.dependencies]
 assert_macros = "2.12.0"
 starknet = "2.12.0"
-snforge_std = "0.48.1"
+snforge_std = "0.50.0"
 
 [dependencies]
 starknet.workspace = true
@@ -66,6 +66,9 @@ openzeppelin_utils = { path = "packages/utils" }
 snforge_std.workspace = true
 openzeppelin_test_common = { path = "packages/test_common" }
 openzeppelin_testing = { path = "packages/testing" }
+
+[workspace.features]
+coverage_incompatible = ["packages/presets/coverage_incompatible"]
 
 [lib]
 

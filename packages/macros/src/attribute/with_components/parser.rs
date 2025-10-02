@@ -9,12 +9,12 @@ use crate::{
 };
 use cairo_lang_defs::patcher::{PatchBuilder, RewriteNode};
 use cairo_lang_macro::{Diagnostic, Diagnostics};
-use cairo_lang_syntax::node::helpers::QueryAttrs;
 use cairo_lang_syntax::node::{
     ast::{self, MaybeModuleBody},
     db::SyntaxGroup,
     SyntaxNode, Terminal, TypedSyntaxNode,
 };
+use cairo_lang_syntax::node::{helpers::QueryAttrs, kind::SyntaxKind};
 use indoc::indoc;
 use regex::Regex;
 
@@ -47,9 +47,20 @@ impl<'a> WithComponentsParser<'a> {
 
         let typed = ast::SyntaxFile::from_syntax_node(db, base_node);
         let mut base_rnode = RewriteNode::from_ast(&typed);
-        let module_rnode = base_rnode
-            .modify_child(db, ast::SyntaxFile::INDEX_ITEMS)
-            .modify_child(db, 0);
+        let module_rnode = base_rnode.modify_child(db, ast::SyntaxFile::INDEX_ITEMS);
+
+        // If the module has a header doc, skip it
+        let module_rnode = if let RewriteNode::Copied(copied) = module_rnode {
+            let children = copied.get_children(db);
+            // children can't be empty because attribute macros must have at least one item (compiler enforces this)
+            if children[0].kind(db) == SyntaxKind::ItemHeaderDoc {
+                module_rnode.modify_child(db, 1)
+            } else {
+                module_rnode.modify_child(db, 0)
+            }
+        } else {
+            module_rnode.modify_child(db, 0)
+        };
 
         // Validate the contract module
         let (errors, mut warnings) =
@@ -112,7 +123,25 @@ fn validate_contract_module(
             return (vec![error], vec![]);
         }
 
-        // 3. Check that the module has the corresponding initializers (warning)
+        // 3. Ensure only one AccessControl component is used (error)
+        let mut accesscontrol_components = vec![];
+        for component in components_info.iter() {
+            match component.kind() {
+                AllowedComponents::AccessControl
+                | AllowedComponents::AccessControlDefaultAdminRules => {
+                    accesscontrol_components.push(component.short_name());
+                }
+                _ => {}
+            }
+        }
+        if accesscontrol_components.len() > 1 {
+            let components_str = accesscontrol_components.join(", ");
+            let error =
+                Diagnostic::error(errors::MULTIPLE_ACCESS_CONTROL_COMPONENTS(&components_str));
+            return (vec![error], vec![]);
+        }
+
+        // 4. Check that the module has the corresponding initializers (warning)
         let components_with_initializer = components_info
             .iter()
             .filter(|c| c.has_initializer)
@@ -151,7 +180,7 @@ fn validate_contract_module(
             }
         }
 
-        // 4. Check that the contract has the corresponding immutable configs
+        // 5. Check that the contract has the corresponding immutable configs
         for component in components_info.iter().filter(|c| c.has_immutable_config) {
             // Get the body code (maybe we can do this without the builder)
             let body_ast = body.as_syntax_node();
